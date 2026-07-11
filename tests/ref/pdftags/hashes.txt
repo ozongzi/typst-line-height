@@ -1,6 +1,6 @@
 fb8fcffb60d5a67ba437ee7efed3d63d bibliography-basic
 ba2fad776ea01badf4d1a914820cac70 break-tags-nested-parbreak
-8eacf9952ce67d990154b48bb8d425a2 break-tags-nested-parbreak-with-nested-groups
+9c689e580c18659c69e1522c95aed116 break-tags-nested-parbreak-with-nested-groups
 5c4f805cf0adecbc82fbaeaf0afd791b deco-tags-different-color
 6977bd5456852cca923953046c21b0a3 deco-tags-different-stroke-thickness
 b444d7d6fc61a7a813333a9c7a34af68 deco-tags-different-type
@@ -8,7 +8,7 @@ e0ba42e4e4c6a143f1eeb7eb64ade657 deco-tags-emph-basic
 06b7073acf30aa52c76be72e83d862e4 deco-tags-highlight-basic
 4d4456674f0320e0412b5e617631ca0e deco-tags-script-custom-baseline
 9502126dc45c14a1d1f5afce660231a0 deco-tags-strong-and-em
-63eea47c335e90790c066d90665bdfc8 deco-tags-strong-basic
+c2f848498edbd19238661f65cc39c958 deco-tags-strong-basic
 f2d580ff3e227ba3727e70316bdcba55 deco-tags-strong-em-and-more-attrs
 f66eb1cef21ec8b0385ec9d333619e50 deco-tags-subscript-basic
 36941a84de690dc9bd8460185e751a8f deco-tags-superscript-basic
@@ -36,8 +36,8 @@ dc328f34d7e95850a5b6ecaa3ac73237 footnote-tags-basic
 4ca1e7a47f5badb0bafbb5eb619397eb footnote-tags-different-lang
 8baa5ef5afdc18f3cc5ad494fa9fc74d footnote-tags-ref-to-other-footnote
 aedfe180f59a9463e715ae5587a5ef34 grid-headers
-1c7e8427b21e7871f73a528eef89bc49 grid-tags-cell-breaking
-78204d67f00bd4162249a661107cc4df grid-tags-internal-grid-layout-breaking-bibliography
+ba99ba1e046eb5d400482b8316f8db96 grid-tags-cell-breaking
+fc73dd2778f2f0859fe19ada081ac119 grid-tags-internal-grid-layout-breaking-bibliography
 2babf3c56121b182a8f1f45411eeacba grid-tags-rowspan
 6d93d5637c6dd5edc2ccca24509367d3 grid-tags-rowspan-split-3
 823b53d909fa38c71d03bf35b4ba1a44 heading-offset
@@ -97,7 +97,7 @@ efbb6418387cf90300ca31f87b9ce91b table-tags-column-and-row-header
 8c29a49aab34f279f4f263b694a22baf table-tags-rowspan-split-2
 fe293e846c491aa08f5bb6073649b523 table-tags-show-rule
 60d057d99899f6c2a13e66f64f36d618 table-tags-unset-bottom-line
-7ecb017be478ed6d66b877087713cbf3 table-tags-unstable-functions
+c8735fc400968af7a8af5935ffb59b88 table-tags-unstable-functions
 06a04f07d3efc428b7b320ff4ee86d3d terms-constructor
 8f55bdb9a5fedb916b5c219b96cf2342 text-lang
 3e725717389b2cabeb6957a717200e87 text-lang-region
