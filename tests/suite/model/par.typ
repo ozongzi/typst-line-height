@@ -499,7 +499,7 @@ Welcome \ here. Does this work well?
 
 --- par-metadata-after-trimmed-space paged ---
 // Ensure that metadata doesn't prevent trailing spaces from being trimmed.
-#set par(justify: true, linebreaks: "simple")
+#set par(justify: true)
 #set text(hyphenate: false)
 Lorem ipsum dolor #metadata(none) nonumy eirmod tempor.
 
@@ -566,7 +566,6 @@ A
   line-height: 2pt,
   spacing: 20pt,
   justify: true,
-  linebreaks: "simple",
   first-line-indent: (amount: 1em, all: true),
   hanging-indent: 5pt,
 )[

@@ -14,12 +14,12 @@ pub use self::shaping::{SharedShapingContext, create_shape_plan, get_font_and_co
 use comemo::{Track, Tracked, TrackedMut};
 use typst_library::diag::SourceResult;
 use typst_library::engine::{Engine, Route, Sink, Traced};
-use typst_library::foundations::{Packed, Smart, StyleChain};
+use typst_library::foundations::{Packed, StyleChain};
 use typst_library::introspection::{Introspector, Locator, LocatorLink, SplitLocator};
 use typst_library::layout::{Abs, AlignElem, Dir, FixedAlignment, Fragment, Size};
 use typst_library::model::{
-    EnumElem, FirstLineIndent, JustificationLimits, Linebreaks, ListElem, ParElem,
-    ParLine, ParLineMarker, TermsElem,
+    EnumElem, FirstLineIndent, JustificationLimits, ListElem, ParElem, ParLine,
+    ParLineMarker, TermsElem,
 };
 use typst_library::routines::{Arenas, Pair, RealizationKind};
 use typst_library::text::{Costs, Lang, TextElem};
@@ -115,7 +115,6 @@ fn layout_par_impl(
         Some(situation),
         &ConfigBase {
             justify: elem.justify.get(styles),
-            linebreaks: elem.linebreaks.get(styles),
             first_line_indent: elem.first_line_indent.get(styles),
             hanging_indent: elem.hanging_indent.resolve(styles),
         },
@@ -141,7 +140,6 @@ pub fn layout_inline<'a>(
         None,
         &ConfigBase {
             justify: shared.get(ParElem::justify),
-            linebreaks: shared.get(ParElem::linebreaks),
             first_line_indent: shared.get(ParElem::first_line_indent),
             hanging_indent: shared.resolve(ParElem::hanging_indent),
         },
@@ -191,9 +189,6 @@ fn configuration(
     Config {
         justify,
         justification_limits: shared.get(ParElem::justification_limits),
-        linebreaks: base.linebreaks.unwrap_or_else(|| {
-            if justify { Linebreaks::Optimized } else { Linebreaks::Simple }
-        }),
         first_line_indent: {
             let amount = base.first_line_indent.amount();
             let all = base.first_line_indent.all();
@@ -260,7 +255,6 @@ pub enum ParSituation {
 /// Raw values from a `ParElem` or style chain. Used to initialize a [`Config`].
 struct ConfigBase {
     justify: bool,
-    linebreaks: Smart<Linebreaks>,
     first_line_indent: FirstLineIndent,
     hanging_indent: Abs,
 }
@@ -271,8 +265,6 @@ struct Config {
     justify: bool,
     /// Settings for justification.
     justification_limits: JustificationLimits,
-    /// How to determine line breaks.
-    linebreaks: Linebreaks,
     /// The indent the first line of a paragraph should have.
     first_line_indent: Abs,
     /// The indent that all but the first line of a paragraph should have.

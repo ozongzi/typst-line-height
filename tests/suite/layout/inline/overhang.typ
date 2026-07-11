@@ -4,7 +4,7 @@
 // Test hanging punctuation.
 // TODO: This test was broken at some point.
 #set page(width: 130pt, margin: 15pt)
-#set par(justify: true, linebreaks: "simple")
+#set par(justify: true)
 #set text(size: 9pt)
 #rect(inset: 0pt, fill: rgb(0, 0, 0, 0), width: 100%)[
   This is a little bit of text that builds up to

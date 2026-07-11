@@ -23,20 +23,18 @@ First line indents and hyphenation play nicely with justified text.
   it; and this ball was her favorite plaything.
 ]
 
-#let column(title, linebreaks, hyphenate) = {
+#let column(title, hyphenate) = {
   rect(inset: 0pt, width: 132pt, fill: rgb("eee"))[
-    #set par(linebreaks: linebreaks)
     #set text(hyphenate: hyphenate)
     #strong(title) \ #story
   ]
 }
 
 #grid(
-  columns: 3,
+  columns: 2,
   gutter: 10pt,
-  column([Simple without hyphens], "simple", false),
-  column([Simple with hyphens], "simple", true),
-  column([Optimized with hyphens], "optimized", true),
+  column([Without hyphens], false),
+  column([With hyphens], true),
 )
 
 --- justify-manual-linebreak paged ---

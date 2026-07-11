@@ -275,29 +275,6 @@ pub struct ParElem {
     #[fold]
     pub justification_limits: JustificationLimits,
 
-    /// How to determine line breaks.
-    ///
-    /// When this property is set to `{auto}`, its default value, optimized line
-    /// breaks will be used for justified paragraphs. Enabling optimized line
-    /// breaks for ragged paragraphs may also be worthwhile to improve the
-    /// appearance of the text.
-    ///
-    /// ```example
-    /// #set page(width: 207pt)
-    /// #set par(linebreaks: "simple")
-    /// Some texts feature many longer
-    /// words. Those are often exceedingly
-    /// challenging to break in a visually
-    /// pleasing way.
-    ///
-    /// #set par(linebreaks: "optimized")
-    /// Some texts feature many longer
-    /// words. Those are often exceedingly
-    /// challenging to break in a visually
-    /// pleasing way.
-    /// ```
-    pub linebreaks: Smart<Linebreaks>,
-
     /// The indent the first line of a paragraph should have.
     ///
     /// By default, only the first line of a consecutive paragraph will be
@@ -544,18 +521,6 @@ impl Limit for Rel<Length> {
         self.abs.checked_max()?;
         Ok(self)
     }
-}
-
-/// How to determine line breaks in a paragraph.
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, Cast)]
-pub enum Linebreaks {
-    /// Determine the line breaks in a simple first-fit style.
-    Simple,
-    /// Optimize the line breaks for the whole paragraph.
-    ///
-    /// Typst will try to produce more evenly filled lines of text by
-    /// considering the whole paragraph when calculating line breaks.
-    Optimized,
 }
 
 /// Configuration for first line indent.

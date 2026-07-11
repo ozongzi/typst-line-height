@@ -137,16 +137,10 @@ For info see #link("https://myhost.tld").
 #h(85pt) งบิก
 
 --- issue-5235-linebreak-optimized-without-justify paged ---
+// Optimized (Knuth-Plass) line breaking now applies even without justification.
 #set page(width: 207pt, margin: 15pt)
 #set text(11pt)
 
-#set par(linebreaks: "simple")
-Some texts feature many longer
-words. Those are often exceedingly
-challenging to break in a visually
-pleasing way.
-
-#set par(linebreaks: "optimized")
 Some texts feature many longer
 words. Those are often exceedingly
 challenging to break in a visually

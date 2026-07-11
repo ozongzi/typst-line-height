@@ -144,7 +144,6 @@ This is the first line \ #h(2cm, weak: true) A new line
 This is the first line \ #h(2cm, weak: false) A new line
 
 --- issue-5244-consecutive-weak-space paged ---
-#set par(linebreaks: "optimized")
 #{
   [A]
   h(0.3em, weak: true)
