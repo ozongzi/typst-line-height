@@ -400,7 +400,7 @@ impl ShowSet for Packed<OutlineElem> {
         out.set(HeadingElem::outlined, false);
         out.set(HeadingElem::numbering, None);
         out.set(ParElem::justify, false);
-        out.set(BlockElem::above, Smart::Custom(styles.get(ParElem::leading).into()));
+        out.set(BlockElem::above, Smart::Custom(styles.get(ParElem::line_height).into()));
         // Makes the outline itself available to its entries. Should be
         // superseded by a proper ancestry mechanism in the future.
         out.set(OutlineEntry::parent, Some(self.clone()));

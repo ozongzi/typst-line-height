@@ -126,7 +126,7 @@ B #cite(<netwok>) #cite(<arrgh>).
 // `par` and `align` are block-level and should interrupt a cite group
 @netwok
 @arrgh
-#par(leading: 5em)[@netwok]
+#par(line-height: 5em)[@netwok]
 #par[@arrgh]
 @netwok
 @arrgh

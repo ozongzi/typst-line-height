@@ -45,7 +45,7 @@ pub struct ListElem {
     /// Defines the default @list.spacing[spacing] of the list. If it is
     /// `{false}`, the items are spaced apart with
     /// @par.spacing[paragraph spacing]. If it is `{true}`, they use
-    /// @par.leading[paragraph leading] instead. This makes the list more
+    /// @par.line-height[paragraph line height] instead. This makes the list more
     /// compact, which can look better if the items are short.
     ///
     /// In markup mode, the value of this parameter is determined based on
@@ -103,7 +103,7 @@ pub struct ListElem {
 
     /// The spacing between the items of the list.
     ///
-    /// If set to `{auto}`, uses paragraph @par.leading[`leading`] for tight
+    /// If set to `{auto}`, uses paragraph @par.line-height[`line-height`] for tight
     /// lists and paragraph @par.spacing[`spacing`] for wide (non-tight) lists.
     pub spacing: Smart<Length>,
 

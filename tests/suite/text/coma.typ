@@ -9,7 +9,7 @@ Ola Nordmann, John Doe
 
 #v(3mm)
 #align(center)[
-  #set par(leading: 3mm)
+  #set par(line-height: 3mm)
   #text(1.2em)[*3. Übungsblatt Computerorientierte Mathematik II*] \
   *Abgabe: 03.05.2019* (bis 10:10 Uhr in MA 001) \
   *Alle Antworten sind zu beweisen.*

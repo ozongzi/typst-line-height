@@ -132,7 +132,7 @@ const LIST_RULE: ShowFn<ListElem> = |elem, _, styles| {
         let spacing = elem
             .spacing
             .get(styles)
-            .unwrap_or_else(|| styles.get(ParElem::leading));
+            .unwrap_or_else(|| styles.get(ParElem::line_height));
         let v = VElem::new(spacing.into()).with_weak(true).with_attach(true).pack();
         realized = v + realized;
     }
@@ -151,7 +151,7 @@ const ENUM_RULE: ShowFn<EnumElem> = |elem, _, styles| {
         let spacing = elem
             .spacing
             .get(styles)
-            .unwrap_or_else(|| styles.get(ParElem::leading));
+            .unwrap_or_else(|| styles.get(ParElem::line_height));
         let v = VElem::new(spacing.into()).with_weak(true).with_attach(true).pack();
         realized = v + realized;
     }
@@ -167,7 +167,7 @@ const TERMS_RULE: ShowFn<TermsElem> = |elem, _, styles| {
     let indent = elem.indent.get(styles);
     let hanging_indent = elem.hanging_indent.get(styles);
     let gutter = elem.spacing.get(styles).unwrap_or_else(|| {
-        if tight { styles.get(ParElem::leading) } else { styles.get(ParElem::spacing) }
+        if tight { styles.get(ParElem::line_height) } else { styles.get(ParElem::spacing) }
     });
 
     let pad = hanging_indent + indent;
@@ -205,7 +205,7 @@ const TERMS_RULE: ShowFn<TermsElem> = |elem, _, styles| {
         let spacing = elem
             .spacing
             .get(styles)
-            .unwrap_or_else(|| styles.get(ParElem::leading));
+            .unwrap_or_else(|| styles.get(ParElem::line_height));
         let v = VElem::new(spacing.into())
             .with_weak(true)
             .with_attach(true)

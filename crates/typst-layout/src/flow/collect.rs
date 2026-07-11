@@ -132,8 +132,8 @@ impl<'a> Collector<'a, '_, '_> {
             self.output.push(Child::Tag(&elem.tag));
         }
 
-        let leading = styles.resolve(ParElem::leading);
-        self.lines(lines, leading, styles);
+        let line_height = styles.resolve(ParElem::line_height);
+        self.lines(lines, line_height, styles);
 
         for (c, _) in &self.children[end..] {
             let elem = c.to_packed::<TagElem>().unwrap();
@@ -172,11 +172,11 @@ impl<'a> Collector<'a, '_, '_> {
         .into_frames();
 
         let spacing = elem.spacing.resolve(styles);
-        let leading = elem.leading.resolve(styles);
+        let line_height = elem.line_height.resolve(styles);
 
         self.output.push(Child::Rel(spacing.into(), 4));
 
-        self.lines(lines, leading, styles);
+        self.lines(lines, line_height, styles);
 
         self.output.push(Child::Rel(spacing.into(), 4));
         self.par_situation = ParSituation::Consecutive;
@@ -185,7 +185,13 @@ impl<'a> Collector<'a, '_, '_> {
     }
 
     /// Collect laid-out lines.
-    fn lines(&mut self, lines: Vec<Frame>, leading: Abs, styles: StyleChain<'a>) {
+    ///
+    /// `line_height` is the desired baseline-to-baseline distance between
+    /// consecutive lines. The actual gap inserted between two lines is
+    /// `line_height` reduced by the depth of the upper line and the height of
+    /// the lower line, so that the baselines end up `line_height` apart. If two
+    /// lines are too tall for that, the gap is clamped to zero to avoid overlap.
+    fn lines(&mut self, lines: Vec<Frame>, line_height: Abs, styles: StyleChain<'a>) {
         let align = styles.resolve(AlignElem::alignment);
         let costs = styles.get(TextElem::costs);
 
@@ -197,6 +203,19 @@ impl<'a> Collector<'a, '_, '_> {
             costs.widow() > Ratio::zero() && len >= 2 && !lines[len - 2].is_empty();
         let prevent_all = len == 3 && prevent_orphans && prevent_widows;
 
+        // The gap to insert _before_ line `i` (with `gaps[0]` unused) so that
+        // its baseline sits `line_height` below the previous line's baseline.
+        let gaps: Vec<Abs> = (0..len)
+            .map(|i| {
+                let Some(i) = i.checked_sub(1) else { return Abs::zero() };
+                let upper = &lines[i];
+                let lower = &lines[i + 1];
+                let depth = upper.height() - upper.baseline();
+                let height = lower.baseline();
+                (line_height - depth - height).max(Abs::zero())
+            })
+            .collect();
+
         // Store the heights of lines at the edges because we'll potentially
         // need these later when `lines` is already moved.
         let height_at = |i| lines.get(i).map(Frame::height).unwrap_or_default();
@@ -207,7 +226,7 @@ impl<'a> Collector<'a, '_, '_> {
 
         for (i, frame) in lines.into_iter().enumerate() {
             if i > 0 {
-                self.output.push(Child::Rel(leading.into(), 5));
+                self.output.push(Child::Rel(gaps[i].into(), 5));
             }
 
             // To prevent widows and orphans, we require enough space for
@@ -215,11 +234,11 @@ impl<'a> Collector<'a, '_, '_> {
             // - the first two lines if we're at the first line
             // - the last two lines if we're at the second to last line
             let need = if prevent_all && i == 0 {
-                front_1 + leading + front_2 + leading + back_1
+                front_1 + gaps[1] + front_2 + gaps[2] + back_1
             } else if prevent_orphans && i == 0 {
-                front_1 + leading + front_2
+                front_1 + gaps[1] + front_2
             } else if prevent_widows && i >= 2 && i + 2 == len {
-                back_2 + leading + back_1
+                back_2 + gaps[len - 1] + back_1
             } else {
                 frame.height()
             };

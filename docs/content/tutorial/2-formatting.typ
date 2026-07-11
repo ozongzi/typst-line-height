@@ -88,7 +88,7 @@ Let's add a few more styles to our document. We want larger margins and a serif 
 )
 #set par(
   justify: true,
-  leading: 0.52em,
+  line-height: 1.2em,
 )
 
 = Introduction

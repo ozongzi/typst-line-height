@@ -20,7 +20,7 @@
 
   if target() == "paged" {
     example-like-block({
-      set par(leading: 0.8em)
+      set par(line-height: 1.45em)
       let path = path.map(raw)
       path.last() = text(fill: colors.text.syntax.blue, path.last())
       path.join(`.`)

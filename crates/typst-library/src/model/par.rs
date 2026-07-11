@@ -97,125 +97,49 @@ use crate::model::Numbering;
 /// ```
 #[elem(scope, title = "Paragraph", Locatable, Tagged)]
 pub struct ParElem {
-    /// The spacing between lines.
+    /// The height of each line, measured from one baseline to the next.
     ///
-    /// Leading defines the spacing between the @text.bottom-edge[bottom edge]
-    /// of one line and the @text.top-edge[top edge] of the following line. By
-    /// default, these two properties are up to the font, but they can also be
-    /// configured manually with a text set rule.
+    /// Line height defines the distance between the baseline of one line and the
+    /// baseline of the following line. Unlike the previous `leading` property,
+    /// which measured the gap between the @text.bottom-edge[bottom edge] of one
+    /// line and the @text.top-edge[top edge] of the next, this measures a full
+    /// baseline-to-baseline distance.
     ///
-    /// By setting top edge, bottom edge, and leading, you can also configure a
-    /// consistent baseline-to-baseline distance. You could, for instance, set
-    /// the leading to `{1em}`, the top-edge to `{0.8em}`, and the bottom-edge
-    /// to `{-0.2em}` to get a baseline gap of exactly `{2em}`. The exact
-    /// distribution of the top- and bottom-edge values affects the bounds of
-    /// the first and last line.
+    /// Measuring baseline-to-baseline keeps the vertical rhythm of the text
+    /// consistent even when individual lines differ in height, for instance
+    /// because they contain an inline @math.equation[equation] or text of a
+    /// larger size. Under the old `leading` model, such lines would push their
+    /// neighbours apart unevenly.
+    ///
+    /// If a line is so tall that keeping the requested line height would make it
+    /// collide with the previous line, the two lines are instead spaced just
+    /// far enough apart to avoid overlapping. In other words, the gap inserted
+    /// between two lines is `line-height` minus the depth of the upper line and
+    /// the height of the lower line, clamped to a minimum of zero.
     ///
     /// ```preview
-    /// // Color palette
-    /// #let c = (
-    ///   par-line: aqua.transparentize(60%),
-    ///   leading-line: blue,
-    ///   leading-text: blue.darken(20%),
-    ///   spacing-line: orange.mix(red).darken(15%),
-    ///   spacing-text: orange.mix(red).darken(20%),
-    /// )
+    /// #set page(width: 300pt, margin: 16pt)
+    /// #set text(luma(25%))
     ///
-    /// // A sample text for measuring font metrics.
-    /// #let sample-text = [A]
+    /// // A small line height packs the lines tightly together ...
+    /// #set par(line-height: 1em)
+    /// #lorem(20)
     ///
-    /// // Number of lines in each paragraph
-    /// #let n-lines = (4, 4, 2)
-    /// #let annotated-lines = (4, 8)
+    /// #line(length: 100%, stroke: 0.5pt + silver)
     ///
-    /// // The wide margin is for annotations
-    /// #set page(width: 350pt, margin: (x: 20%))
-    ///
-    /// #context {
-    ///   let text-height = measure(sample-text).height
-    ///   let line-height = text-height + par.leading.to-absolute()
-    ///
-    ///   let jumps = n-lines
-    ///     .map(n => ((text-height,) * n).intersperse(par.leading))
-    ///     .intersperse(par.spacing)
-    ///     .flatten()
-    ///
-    ///   place(grid(
-    ///     ..jumps
-    ///       .enumerate()
-    ///       .map(((i, h)) => if calc.even(i) {
-    ///         // Draw a stripe for the line
-    ///         block(height: h, width: 100%, fill: c.par-line)
-    ///       } else {
-    ///         // Put an annotation for the gap
-    ///         let sw(a, b) = if h == par.leading { a } else { b }
-    ///
-    ///         align(end, block(
-    ///           height: h,
-    ///           outset: (right: sw(0.5em, 1em)),
-    ///           stroke: (
-    ///             left: none,
-    ///             rest: 0.5pt + sw(c.leading-line, c.spacing-line),
-    ///           ),
-    ///           if i / 2 <= sw(..annotated-lines) {
-    ///             place(horizon, dx: 1.3em, text(
-    ///               0.8em,
-    ///               sw(c.leading-text, c.spacing-text),
-    ///               sw([leading], [spacing]),
-    ///             ))
-    ///           },
-    ///         ))
-    ///       })
-    ///   ))
-    ///
-    ///   // Mark top and bottom edges
-    ///   place(
-    ///     // pos: top/bottom edge
-    ///     // dy: Δy to the last mark
-    ///     // kind: leading/spacing
-    ///     for (pos, dy, kind) in (
-    ///       (bottom, text-height, "leading"),
-    ///       (top, par.leading, "leading"),
-    ///       (bottom, (n-lines.first() - 1) * line-height - par.leading, "spacing"),
-    ///       (top, par.spacing, "spacing"),
-    ///     ) {
-    ///       v(dy)
-    ///
-    ///       let c-text = c.at(kind + "-text")
-    ///       let c-line = c.at(kind + "-line")
-    ///
-    ///       place(end, box(
-    ///         height: 0pt,
-    ///         grid(
-    ///           columns: 2,
-    ///           column-gutter: 0.2em,
-    ///           align: pos,
-    ///           move(
-    ///             // Compensate optical illusion
-    ///             dy: if pos == top { -0.2em } else { 0.05em },
-    ///             text(0.8em, c-text)[#repr(pos) edge],
-    ///           ),
-    ///           line(length: 1em, stroke: 0.5pt + c-line),
-    ///         ),
-    ///       ))
-    ///     },
-    ///   )
-    /// }
-    ///
-    /// #set par(justify: true)
-    /// #set text(luma(25%), overhang: false)
-    /// #show ". ": it => it + parbreak()
-    /// #lorem(55)
+    /// // ... while a larger one spreads them out.
+    /// #set par(line-height: 2em)
+    /// #lorem(20)
     /// ```
-    #[default(Em::new(0.65).into())]
-    pub leading: Length,
+    #[default(Em::new(1.3).into())]
+    pub line_height: Length,
 
     /// The spacing between paragraphs.
     ///
-    /// Just like leading, this defines the spacing between the bottom edge of a
-    /// paragraph's last line and the top edge of the next paragraph's first
-    /// line. Spacing acts both above and below, collapsing to the greater of
-    /// the amounts defined by adjacent paragraphs.
+    /// This defines the spacing between the bottom edge of a paragraph's last
+    /// line and the top edge of the next paragraph's first line. Spacing acts
+    /// both above and below, collapsing to the greater of the amounts defined
+    /// by adjacent paragraphs.
     ///
     /// When a paragraph is adjacent to a @block, that block's
     /// @block.above[`above`] or @block.below[`below`] property takes precedence
@@ -387,8 +311,8 @@ pub struct ParElem {
     ///
     /// By typographic convention, paragraph breaks are indicated either by some
     /// space between paragraphs or by indented first lines. Consider
-    /// - reducing the @par.spacing[paragraph `spacing`] to the
-    ///   @par.leading[`leading`] using `{set par(spacing: 0.65em)}`
+    /// - reducing the @par.spacing[paragraph `spacing`] to roughly the
+    ///   @par.line-height[`line-height`] using `{set par(spacing: 0.65em)}`
     /// - increasing the @block.spacing[block `spacing`] (which inherits the
     ///   paragraph spacing by default) to the original paragraph spacing using
     ///   `{set block(spacing: 1.2em)}`

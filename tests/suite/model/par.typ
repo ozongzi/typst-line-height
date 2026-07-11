@@ -311,7 +311,7 @@ A few
 
 --- par-leading-and-spacing paged ---
 // Test changing leading and spacing.
-#set par(spacing: 1em, leading: 2pt)
+#set par(spacing: 1em, line-height: 2pt)
 But, soft! what light through yonder window breaks?
 
 It is the east, and Juliet is the sun.
@@ -321,7 +321,7 @@ It is the east, and Juliet is the sun.
 #context test(par.spacing, 10pt)
 
 --- par-first-line-indent paged ---
-#set par(first-line-indent: 12pt, spacing: 5pt, leading: 5pt)
+#set par(first-line-indent: 12pt, spacing: 5pt, line-height: 5pt)
 #show heading: set text(size: 10pt)
 
 The first paragraph has no indent.
@@ -340,7 +340,7 @@ starts a paragraph, also with indent.
   Except if you have another paragraph in them.
 
 #set text(8pt, lang: "ar", font: ("Noto Sans Arabic", "Libertinus Serif"))
-#set par(leading: 8pt)
+#set par(line-height: 8pt)
 
 = Arabic
 دع النص يمطر عليك
@@ -397,7 +397,7 @@ G \ H
 #set par(
   first-line-indent: (amount: 12pt, all: true),
   spacing: 5pt,
-  leading: 5pt,
+  line-height: 5pt,
 )
 #set block(spacing: 1.2em)
 #show heading: set text(size: 10pt)
@@ -412,7 +412,7 @@ Even the first.
 #set par(
   first-line-indent: (amount: 12pt, all: true),
   spacing: 5pt,
-  leading: 5pt,
+  line-height: 5pt,
 )
 
 - A #parbreak() B #line(length: 100%) C
@@ -424,7 +424,7 @@ Even the first.
 #set par(
   first-line-indent: (amount: 12pt, all: true),
   spacing: 5pt,
-  leading: 5pt,
+  line-height: 5pt,
 )
 
 + A #parbreak() B #line(length: 100%) C
@@ -437,7 +437,7 @@ Even the first.
 #set par(
   first-line-indent: (amount: 12pt, all: true),
   spacing: 5pt,
-  leading: 5pt,
+  line-height: 5pt,
 )
 
 / Term A: B \ C #parbreak() D #line(length: 100%) E
@@ -563,7 +563,7 @@ A
 // Make sure that all arguments are also respected in the constructor.
 A
 #par(
-  leading: 2pt,
+  line-height: 2pt,
   spacing: 20pt,
   justify: true,
   linebreaks: "simple",

@@ -541,7 +541,7 @@ Papers set in LaTeX have an unmistakeable look. This is mostly due to their font
 
 The example below
 - sets wide @page.margin[margins]
-- enables @par.justify[justification], @par.leading[tighter lines] and @par.first-line-indent[first-line-indent]
+- enables @par.justify[justification], @par.line-height[tighter lines] and @par.first-line-indent[first-line-indent]
 - @text.font[sets the font] to "New Computer Modern", an OpenType derivative of Computer Modern for both text and @raw[code blocks]
 - decreases the @text.weight[font weight] in math mode
 - disables paragraph @block.spacing[spacing]
@@ -549,7 +549,7 @@ The example below
 
 ```typ
 #set page(margin: 1.75in)
-#set par(leading: 0.55em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
+#set par(line-height: 1.2em, spacing: 0.55em, first-line-indent: 1.8em, justify: true)
 #set text(font: "New Computer Modern")
 #show raw: set text(font: "New Computer Modern Mono")
 #show math.equation: set text(weight: "regular")

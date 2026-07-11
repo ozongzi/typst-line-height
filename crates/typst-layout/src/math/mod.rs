@@ -26,7 +26,6 @@ use typst_library::math::ir::{
     resolve_equation,
 };
 use typst_library::math::{EquationElem, families};
-use typst_library::model::ParElem;
 use typst_library::routines::Arenas;
 use typst_library::text::{
     Font, FontFlags, FontInstance, TextEdgeBounds, TextElem, variant,
@@ -83,7 +82,7 @@ pub fn layout_equation_inline(
     for item in &mut items {
         let InlineItem::Frame(frame) = item else { continue };
 
-        let slack = styles.resolve(ParElem::leading) * 0.7;
+        let slack = self::run::LEADING.resolve(styles) * 0.7;
 
         let (t, b) = font.edges(
             styles.get(TextElem::top_edge),

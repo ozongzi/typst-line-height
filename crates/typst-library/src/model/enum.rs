@@ -71,7 +71,7 @@ pub struct EnumElem {
     /// Defines the default @enum.spacing[spacing] of the enumeration. If it is
     /// `{false}`, the items are spaced apart with
     /// @par.spacing[paragraph spacing]. If it is `{true}`, they use
-    /// @par.leading[paragraph leading] instead. This makes the list more
+    /// @par.line-height[paragraph line height] instead. This makes the list more
     /// compact, which can look better if the items are short.
     ///
     /// In markup mode, the value of this parameter is determined based on
@@ -158,7 +158,7 @@ pub struct EnumElem {
 
     /// The spacing between the items of the enumeration.
     ///
-    /// If set to `{auto}`, uses paragraph @par.leading[`leading`] for tight
+    /// If set to `{auto}`, uses paragraph @par.line-height[`line-height`] for tight
     /// enumerations and paragraph @par.spacing[`spacing`] for wide (non-tight)
     /// enumerations.
     pub spacing: Smart<Length>,

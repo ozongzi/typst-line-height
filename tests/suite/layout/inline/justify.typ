@@ -1,6 +1,6 @@
 --- justify paged ---
 #set page(width: 180pt)
-#set par(justify: true, first-line-indent: 14pt, spacing: 5pt, leading: 5pt)
+#set par(justify: true, first-line-indent: 14pt, spacing: 5pt, line-height: 5pt)
 
 This text is justified, meaning that spaces are stretched so that the text
 forms a "block" with flush edges at both sides.
@@ -9,7 +9,7 @@ First line indents and hyphenation play nicely with justified text.
 
 --- justify-knuth-story paged large ---
 #set page(width: auto, height: auto)
-#set par(leading: 4pt, justify: true)
+#set par(line-height: 4pt, justify: true)
 #set text(font: "New Computer Modern")
 
 #let story = [

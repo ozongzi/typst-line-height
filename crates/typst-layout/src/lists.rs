@@ -27,7 +27,7 @@ pub fn layout_list(
     let body_indent = elem.body_indent.get(styles);
     let tight = elem.tight.get(styles);
     let gutter = elem.spacing.get(styles).unwrap_or_else(|| {
-        if tight { styles.get(ParElem::leading) } else { styles.get(ParElem::spacing) }
+        if tight { styles.get(ParElem::line_height) } else { styles.get(ParElem::spacing) }
     });
     let is_rtl = styles.get(TextElem::dir).resolve(styles) == Dir::RTL;
 
@@ -88,7 +88,7 @@ pub fn layout_enum(
     let body_indent = elem.body_indent.get(styles);
     let tight = elem.tight.get(styles);
     let gutter = elem.spacing.get(styles).unwrap_or_else(|| {
-        if tight { styles.get(ParElem::leading) } else { styles.get(ParElem::spacing) }
+        if tight { styles.get(ParElem::line_height) } else { styles.get(ParElem::spacing) }
     });
     let is_rtl = styles.get(TextElem::dir).resolve(styles) == Dir::RTL;
 

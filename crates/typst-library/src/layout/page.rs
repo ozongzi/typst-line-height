@@ -427,7 +427,7 @@ pub struct PageElem {
     ///       bottom-edge: "bounds",
     ///       top-edge: "bounds",
     ///     )
-    ///     set par(leading: 0.5em)
+    ///     set par(line-height: 1.15em)
     ///     import grid: cell
     ///     context grid(
     ///       align: center + horizon,

@@ -5,11 +5,17 @@ use typst_library::layout::{
 };
 use typst_library::math::ir::{AlignedRow, MathItem, MultilineItem};
 use typst_library::math::{EquationElem, LeftRightAlternator, MathSize};
-use typst_library::model::ParElem;
 use unicode_math_class::MathClass;
 
 use super::MathContext;
 use super::fragment::MathFragment;
+
+/// Leading between rows in text size and above.
+///
+/// This is the gap between equation rows. It is deliberately independent of the
+/// paragraph's `line-height`, which is a baseline-to-baseline distance rather
+/// than an edge-to-edge gap and would over-space equation rows.
+pub(super) const LEADING: Em = Em::new(0.65);
 
 /// Leading between rows in script and scriptscript size.
 const TIGHT_LEADING: Em = Em::new(0.25);
@@ -47,7 +53,7 @@ pub fn layout_multiline(
     }
 
     let leading = if styles.get(EquationElem::size) >= MathSize::Text {
-        styles.resolve(ParElem::leading)
+        LEADING.resolve(styles)
     } else {
         TIGHT_LEADING.resolve(styles)
     };

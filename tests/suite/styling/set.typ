@@ -94,7 +94,7 @@ Hello *#x*
 --- set-vs-construct-1 paged ---
 // Ensure that constructor styles aren't passed down the tree.
 // The inner list should have no extra indent.
-#set par(leading: 2pt)
+#set par(line-height: 2pt)
 #list(body-indent: 20pt, [First], list[A][B])
 
 --- set-vs-construct-2 paged ---

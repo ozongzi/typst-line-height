@@ -83,7 +83,7 @@ pub trait FrameModifyText {
 impl FrameModifyText for Frame {
     fn modify_text(&mut self, styles: StyleChain) {
         let modifiers = FrameModifiers::get_in(styles);
-        let expand_y = 0.5 * styles.resolve(ParElem::leading);
+        let expand_y = 0.5 * styles.resolve(ParElem::line_height);
         let outset = Sides::new(Abs::zero(), expand_y, Abs::zero(), expand_y);
         modify_frame(self, &modifiers, Some(outset));
     }
