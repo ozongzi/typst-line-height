@@ -31,7 +31,7 @@ c08fe735930451017157dcb2ab74552b figure-tags-image-figure-with-caption
 cfbea2d7ed48bff043919987ff2a4130 figure-tags-listing
 434446e66eeb0f1a0cf8d8f307dbe594 figure-tags-only-marked-content
 d30d960cd017a77c60260a7386df8266 figure-tags-with-alt-flatten-content-basic
-02dc0d7c5ef5532c577742db0cad9076 figure-tags-with-alt-flatten-content-complex
+c264a536d502b3a3ed822bdd4b9ff839 figure-tags-with-alt-flatten-content-complex
 dc328f34d7e95850a5b6ecaa3ac73237 footnote-tags-basic
 4ca1e7a47f5badb0bafbb5eb619397eb footnote-tags-different-lang
 8baa5ef5afdc18f3cc5ad494fa9fc74d footnote-tags-ref-to-other-footnote
@@ -97,7 +97,7 @@ efbb6418387cf90300ca31f87b9ce91b table-tags-column-and-row-header
 8c29a49aab34f279f4f263b694a22baf table-tags-rowspan-split-2
 fe293e846c491aa08f5bb6073649b523 table-tags-show-rule
 60d057d99899f6c2a13e66f64f36d618 table-tags-unset-bottom-line
-60dffc17451532b755c36045d1f21cf9 table-tags-unstable-functions
+7ecb017be478ed6d66b877087713cbf3 table-tags-unstable-functions
 06a04f07d3efc428b7b320ff4ee86d3d terms-constructor
 8f55bdb9a5fedb916b5c219b96cf2342 text-lang
 3e725717389b2cabeb6957a717200e87 text-lang-region
