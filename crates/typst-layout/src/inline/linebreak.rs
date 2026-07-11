@@ -28,6 +28,14 @@ type Cost = f64;
 const DEFAULT_HYPH_COST: Cost = 135.0;
 const DEFAULT_RUNT_COST: Cost = 100.0;
 
+/// The line penalty `l` added to badness before squaring (tex.web's
+/// `\linepenalty`; we keep it small to slightly favor fewer lines).
+const LINE_PENALTY: Cost = 1.0;
+
+/// Extra demerits when two adjacent lines differ in fitness class by more than
+/// one (tex.web's `\adjdemerits`).
+const DEFAULT_ADJ_DEMERITS: Cost = 10_000.0;
+
 // Other parameters.
 const MIN_RATIO: f64 = -1.0;
 const MIN_APPROX_RATIO: f64 = -0.5;
@@ -205,17 +213,25 @@ fn linebreak_optimized_bounded<'a>(
         total: Cost,
         line: Line<'a>,
         end: usize,
+        /// The fitness class of the line ending at this entry (tex.web's four
+        /// classes: 0 = very loose, 1 = loose, 2 = decent, 3 = tight). We keep
+        /// the best entry _per fitness class_ at each breakpoint because a
+        /// successor's demerits depend on this line's fitness.
+        fitness: u8,
     }
 
-    // Dynamic programming table.
-    let mut table = vec![Entry { pred: 0, total: 0.0, line: Line::empty(), end: 0 }];
+    // Dynamic programming table. The start node has fitness `decent` (2), as in
+    // tex.web, so the first line is compared against a decent predecessor.
+    let mut table =
+        vec![Entry { pred: 0, total: 0.0, line: Line::empty(), end: 0, fitness: 2 }];
 
     let mut active = 0;
     let mut prev_end = 0;
 
     breakpoints(p, |end, breakpoint| {
-        // Find the optimal predecessor.
-        let mut best: Option<Entry> = None;
+        // Find the optimal predecessor for each fitness class of the line
+        // ending here.
+        let mut best: [Option<Entry>; 4] = [None, None, None, None];
 
         // A lower bound for the cost of all following line attempts.
         let mut line_lower_bound = None;
@@ -235,8 +251,8 @@ fn linebreak_optimized_bounded<'a>(
             // Build the line.
             let attempt = line(engine, p, start..end, breakpoint, Some(&pred.line));
 
-            // Determine the cost of the line and its stretch ratio.
-            let (line_ratio, line_cost) = ratio_and_cost(
+            // Determine the cost, fitness, and stretch ratio of the line.
+            let (line_ratio, line_cost, fitness) = ratio_and_cost(
                 p,
                 metrics,
                 width,
@@ -260,8 +276,16 @@ fn linebreak_optimized_bounded<'a>(
                 active += 1;
             }
 
+            // Adjacent-fitness demerit (tex.web): if this line's fitness class
+            // differs from its predecessor's by more than one, add adj_demerits.
+            let adj = if (fitness as i16 - pred.fitness as i16).abs() > 1 {
+                DEFAULT_ADJ_DEMERITS
+            } else {
+                0.0
+            };
+
             // The total cost of this line and its chain of predecessors.
-            let total = pred.total + line_cost;
+            let total = pred.total + line_cost + adj;
 
             // If the line is already underfull (`line_ratio > 0`), any shorter
             // slice of the line will be even more underfull. So it'll only get
@@ -282,9 +306,11 @@ fn linebreak_optimized_bounded<'a>(
                 continue;
             }
 
-            // If this attempt is better than what we had before, take it!
-            if best.as_ref().is_none_or(|best| best.total >= total) {
-                best = Some(Entry { pred: pred_index, total, line: attempt, end });
+            // If this attempt is better than what we had before for this
+            // fitness class, take it!
+            let slot = &mut best[fitness as usize];
+            if slot.as_ref().is_none_or(|best| best.total >= total) {
+                *slot = Some(Entry { pred: pred_index, total, line: attempt, end, fitness });
             }
         }
 
@@ -294,28 +320,46 @@ fn linebreak_optimized_bounded<'a>(
             active = table.len();
         }
 
-        table.extend(best);
+        for entry in best {
+            table.extend(entry);
+        }
         prev_end = end;
     });
 
-    // Retrace the best path.
+    // Retrace the best path, starting from the cheapest entry that ends the
+    // text (there may be up to four, one per fitness class).
+    let text_len = p.text.len();
+    let final_idx = table
+        .iter()
+        .enumerate()
+        // Skip the sentinel start node at index 0: it also has `end == 0`, so
+        // for empty text it would otherwise win (it has the lowest total) and
+        // yield zero lines instead of the single empty line.
+        .filter(|(i, e)| *i != 0 && e.end == text_len)
+        .min_by(|a, b| a.1.total.total_cmp(&b.1.total))
+        .map(|(i, _)| i);
+
+    let mut idx = match final_idx {
+        Some(idx) => idx,
+        // No real entry reached the end. If the start node itself is already at
+        // the end (empty text with no breakpoints), there are simply no lines.
+        None if table[0].end == text_len => return Vec::new(),
+        // Otherwise our bound was faulty, which shouldn't happen.
+        None => {
+            #[cfg(debug_assertions)]
+            panic!("bounded inline layout is incomplete");
+
+            #[cfg(not(debug_assertions))]
+            return linebreak_optimized_bounded(engine, p, width, metrics, Cost::INFINITY);
+        }
+    };
+
     let mut lines = Vec::with_capacity(16);
-    let mut idx = table.len() - 1;
-
-    // This should only happen if our bound was faulty. Which shouldn't happen!
-    if table[idx].end != p.text.len() {
-        #[cfg(debug_assertions)]
-        panic!("bounded inline layout is incomplete");
-
-        #[cfg(not(debug_assertions))]
-        return linebreak_optimized_bounded(engine, p, width, metrics, Cost::INFINITY);
-    }
-
     while idx != 0 {
-        table.truncate(idx + 1);
-        let entry = table.pop().unwrap();
-        lines.push(entry.line);
-        idx = entry.pred;
+        let pred = table[idx].pred;
+        // Move the line out of the table (each entry is visited at most once).
+        lines.push(std::mem::replace(&mut table[idx].line, Line::empty()));
+        idx = pred;
     }
 
     lines.reverse();
@@ -395,8 +439,11 @@ fn linebreak_optimized_approximate(
                 estimates.justifiables.estimate(start..trimmed_end),
             );
 
-            // Determine the line's cost.
-            let line_cost = raw_cost(
+            // Determine the line's cost. The fitness class is ignored in this
+            // approximate pass; adjacency demerits are only added when we
+            // compute the exact cost of the chosen layout below (which keeps
+            // the resulting upper bound valid).
+            let (line_cost, _) = raw_cost(
                 metrics,
                 breakpoint,
                 line_ratio,
@@ -448,16 +495,18 @@ fn linebreak_optimized_approximate(
     let mut pred = Line::empty();
     let mut start = 0;
     let mut exact = 0.0;
+    // The start node has fitness `decent` (2), as in tex.web.
+    let mut pred_fitness: u8 = 2;
 
     // The cost that we optimized was only an approximate cost, so the layout we
     // got here is only likely to be good, not guaranteed to be the best. We now
-    // computes its exact cost as that gives us a sound upper bound for the
-    // proper optimization pass.
+    // computes its exact cost (including adjacency demerits) as that gives us a
+    // sound upper bound for the proper optimization pass.
     for idx in indices.into_iter().rev() {
         let Entry { end, breakpoint, unbreakable, .. } = table[idx];
 
         let attempt = line(engine, p, start..end, breakpoint, Some(&pred));
-        let (ratio, line_cost) =
+        let (ratio, line_cost, fitness) =
             ratio_and_cost(p, metrics, width, &pred, &attempt, breakpoint, unbreakable);
 
         // If approximation produces a valid layout without too much shrinking,
@@ -470,9 +519,16 @@ fn linebreak_optimized_approximate(
             return Cost::INFINITY;
         }
 
+        let adj = if (fitness as i16 - pred_fitness as i16).abs() > 1 {
+            DEFAULT_ADJ_DEMERITS
+        } else {
+            0.0
+        };
+
         pred = attempt;
+        pred_fitness = fitness;
         start = end;
-        exact += line_cost;
+        exact += line_cost + adj;
     }
 
     exact
@@ -487,7 +543,7 @@ fn ratio_and_cost(
     attempt: &Line,
     breakpoint: Breakpoint,
     unbreakable: bool,
-) -> (f64, Cost) {
+) -> (f64, Cost, u8) {
     let ratio = raw_ratio(
         p,
         available_width,
@@ -497,7 +553,7 @@ fn ratio_and_cost(
         attempt.justifiables(),
     );
 
-    let cost = raw_cost(
+    let (cost, fitness) = raw_cost(
         metrics,
         breakpoint,
         ratio,
@@ -507,7 +563,7 @@ fn ratio_and_cost(
         false,
     );
 
-    (ratio, cost)
+    (ratio, cost, fitness)
 }
 
 /// Determine the stretch ratio for a line given raw metrics.
@@ -580,8 +636,8 @@ fn raw_cost(
     unbreakable: bool,
     consecutive_dash: bool,
     approx: bool,
-) -> Cost {
-    // Determine the stretch/shrink cost of the line.
+) -> (Cost, u8) {
+    // Determine the stretch/shrink badness of the line (Knuth-Plass: 100|r|^3).
     let badness = if ratio < metrics.min_ratio(approx) {
         // Overfull line always has maximum cost.
         1_000_000.0
@@ -596,37 +652,53 @@ fn raw_cost(
         0.0
     };
 
-    // Compute penalties.
-    let mut penalty = 0.0;
+    // Fitness class, following tex.web: derived from the badness and whether
+    // the line is stretched (`ratio >= 0`) or shrunk (`ratio < 0`).
+    //   stretch: b > 99 => very loose (0), b > 12 => loose (1), else decent (2)
+    //   shrink:  b > 12 => tight (3), else decent (2)
+    let fitness = if ratio >= 0.0 {
+        if badness > 99.0 {
+            0
+        } else if badness > 12.0 {
+            1
+        } else {
+            2
+        }
+    } else if badness > 12.0 {
+        3
+    } else {
+        2
+    };
 
-    // Penalize runts (lone words before a mandatory break / at the end).
-    if unbreakable && breakpoint == Breakpoint::Mandatory {
-        penalty += metrics.runt_cost;
-    }
+    // Knuth-Plass demerits: `d = (line_penalty + badness)^2`, with the penalties
+    // added _outside_ the square (as in the paper and tex.web), not folded into
+    // it. Following tex.web, a line whose `line_penalty + badness` reaches
+    // 10000 is treated as effectively infeasible with a flat huge cost.
+    let base = LINE_PENALTY + badness;
+    let mut cost = if base.abs() >= 10_000.0 { 1e8 } else { base * base };
 
-    // Penalize hyphenation.
+    // Penalize hyphenation (a positive break penalty `pi`, contributing +pi^2).
     if let Breakpoint::Hyphen(l, r) = breakpoint {
         // We penalize hyphenations close to the edges of the word (< LIMIT
-        // chars) extra. For each step of distance from the limit, we add 15%
-        // to the cost.
+        // chars) extra. For each step of distance from the limit, we add 15%.
         const LIMIT: u8 = 5;
         let steps = LIMIT.saturating_sub(l) + LIMIT.saturating_sub(r);
-        let extra = 0.15 * steps as f64;
-        penalty += (1.0 + extra) * metrics.hyph_cost;
+        let pi = (1.0 + 0.15 * steps as f64) * metrics.hyph_cost;
+        cost += pi * pi;
     }
 
-    // Penalize two consecutive dashes extra (not necessarily hyphens).
-    // Knuth-Plass does this separately after the squaring, with a higher cost,
-    // but I couldn't find any explanation as to why.
+    // Penalize runts (lone word before a mandatory break / at the end).
+    if unbreakable && breakpoint == Breakpoint::Mandatory {
+        cost += metrics.runt_cost * metrics.runt_cost;
+    }
+
+    // Penalize two consecutive dashes (tex.web's `double_hyphen_demerits`,
+    // added outside the square).
     if consecutive_dash {
-        penalty += metrics.hyph_cost;
+        cost += metrics.hyph_cost * metrics.hyph_cost;
     }
 
-    // From the Knuth-Plass Paper: $ (1 + beta_j + pi_j)^2 $.
-    //
-    // We add one to minimize the number of lines when everything else is more
-    // or less equal.
-    Scalar::new(1.0 + badness + penalty).powi(2).get()
+    (cost, fitness)
 }
 
 /// Calls `f` for all possible points in the text where lines can broken.
